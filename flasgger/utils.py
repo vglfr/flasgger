@@ -55,10 +55,15 @@ def get_schema_specs(schema_id, swagger):
             current_app.url_map.iter_rules(), ignore_verbs,
             optional_fields, swagger.sanitizer)
 
-        swags = (swag for _, verbs in specs for _, swag in verbs
-                 if swag is not None)
+        swags = tuple(swag for _, verbs in specs for _, swag in verbs
+                      if swag is not None)
+
+    definitions = {}
+    for swag in swags:
+        definitions.update(swag.get('definitions', {}))
 
     for swag in swags:
+        swag['definitions'] = definitions
         for d in swag.get('parameters', []):
             d_schema_id = d.get('schema', {}).get('id')
             if d_schema_id is not None \
